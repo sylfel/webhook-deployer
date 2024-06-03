@@ -23,8 +23,12 @@ class GithubValidator implements SignatureValidator
             throw InvalidConfig::signingSecretNotSet();
         }
 
-        $computedSignature = hash_hmac('sha256', $request->getContent(), $signingSecret);
+        return $this->checkValid($signature, $request->getContent(), $signingSecret);
+    }
 
-        return hash_equals($signature, 'sha256=' . $computedSignature);
+    public function checkValid($signature, $content, $signingSecret): bool
+    {
+        $computedSignature = hash_hmac('sha256', $content, $signingSecret);
+        return hash_equals('sha256=' . $computedSignature, $signature);
     }
 }
