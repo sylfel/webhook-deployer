@@ -16,16 +16,11 @@ return [
             'signing_secret' => env('WEBHOOK_CLIENT_SECRET'),
 
             /*
-             * The name of the header containing the signature.
-             */
-            'signature_header_name' => 'Signature',
-
-            /*
              *  This class will verify that the content of the signature header is valid.
              *
              * It should implement \Spatie\WebhookClient\SignatureValidator\SignatureValidator
              */
-            'signature_validator' => \Spatie\WebhookClient\SignatureValidator\DefaultSignatureValidator::class,
+            'signature_validator' => \App\Webhook\GithubValidator::class,
 
             /*
              * This class determines if the webhook call should be stored and processed.
