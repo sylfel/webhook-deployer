@@ -11,9 +11,9 @@ class Deployer extends SpatieProcessWebhookJob
     {
         $repository = $this->webhookCall->payload['repository'];
         $pathSites = config('app.home');
-        $homeDir = $pathSites.$repository;
+        $homeDir = $pathSites . $repository;
         if (file_exists($homeDir)) {
-            Process::run($homeDir.'/scripts/deploy.sh');
+            Process::run($homeDir . '/.scripts/deploy.sh');
         }
     }
 }
