@@ -23,7 +23,7 @@ class Deployer extends SpatieProcessWebhookJob
             Log::notice('Deployer (id : {id}) - Path not exists {path}', ['id' => $this->webhookCall->id, 'path' => $homePath]);
             return;
         }
-        $scriptPath = $homePath . '/.scripts/deploy.sh';
+        $scriptPath = $homePath . '/.script/deploy.sh';
         if (!file_exists($scriptPath)) {
             Log::notice('Deployer (id : {id}) - Script not exists {path}', ['id' => $this->webhookCall->id, 'path' => $scriptPath]);
             return;
