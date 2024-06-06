@@ -32,7 +32,7 @@ class RefreshGithubIP extends Command
         if ($response->successful()) {
             IpRange::truncate();
             $starting_time = microtime(true);
-            $actionIps = collect($response->json()['actions']);
+            $actionIps = collect($response->json()['hooks']);
             $ipRangeList = $actionIps->map(function (string $item) {
                 $range = Factory::parseRangeString($item);
 
