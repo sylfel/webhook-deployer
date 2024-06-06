@@ -18,6 +18,7 @@ class Deployer extends SpatieProcessWebhookJob
 
             return;
         }
+
         $pathSites = config('app.home');
         $homePath = $pathSites.$repository;
         if (! file_exists($homePath)) {
@@ -25,6 +26,7 @@ class Deployer extends SpatieProcessWebhookJob
 
             return;
         }
+
         $scriptPath = $homePath.'/.script/deploy.sh';
         if (! file_exists($scriptPath)) {
             Log::notice('Deployer (id : {id}) - Script not exists {path}', ['id' => $this->webhookCall->id, 'path' => $scriptPath]);
@@ -32,6 +34,7 @@ class Deployer extends SpatieProcessWebhookJob
             return;
         }
         Log::notice('Deployer (id : {id}) - Run {path}', ['id' => $this->webhookCall->id, 'path' => $scriptPath]);
-        Process::run($scriptPath);
+        $result = Process::path($homePath)->run('bash .script/deploy.sh');
+        Log::notice('-- (id : {id}) - Result {result}', ['result' => $result]);
     }
 }
