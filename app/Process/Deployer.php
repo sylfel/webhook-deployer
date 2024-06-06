@@ -13,19 +13,22 @@ class Deployer extends SpatieProcessWebhookJob
     {
         $payload = $this->webhookCall->payload;
         $repository = Arr::get($payload, 'repository.name');
-        if (!$repository) {
+        if (! $repository) {
             Log::notice('Deployer (id : {id}) - no repository ', ['id' => $this->webhookCall->id]);
+
             return;
         }
         $pathSites = config('app.home');
-        $homePath = $pathSites . $repository;
-        if (!file_exists($homePath)) {
+        $homePath = $pathSites.$repository;
+        if (! file_exists($homePath)) {
             Log::notice('Deployer (id : {id}) - Path not exists {path}', ['id' => $this->webhookCall->id, 'path' => $homePath]);
+
             return;
         }
-        $scriptPath = $homePath . '/.script/deploy.sh';
-        if (!file_exists($scriptPath)) {
+        $scriptPath = $homePath.'/.script/deploy.sh';
+        if (! file_exists($scriptPath)) {
             Log::notice('Deployer (id : {id}) - Script not exists {path}', ['id' => $this->webhookCall->id, 'path' => $scriptPath]);
+
             return;
         }
         Log::notice('Deployer (id : {id}) - Run {path}', ['id' => $this->webhookCall->id, 'path' => $scriptPath]);

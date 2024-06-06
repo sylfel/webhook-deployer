@@ -25,11 +25,12 @@ class WhiteIpList
             $isValid = IpRange::where('adresseType', $ipAdresse->getAddressType())
                 ->whereRaw('? between rangeFrom and rangeTo', [$ipAdresse->getComparableString()])
                 ->count() > 0;
-            if (!$isValid) {
+            if (! $isValid) {
                 Log::notice('WhiteIpList : ip not in white list {ip}', ['ip' => $ipAdresse->toString()]);
                 throw new AccessDeniedHttpException('Ip unauthorized');
             }
         }
+
         return $next($request);
     }
 }

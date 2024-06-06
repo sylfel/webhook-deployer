@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\IpRange;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
+use IPLib\Factory;
 
 class RefreshGithubIP extends Command
 {
@@ -33,7 +34,7 @@ class RefreshGithubIP extends Command
             $starting_time = microtime(true);
             $actionIps = collect($response->json()['actions']);
             $ipRangeList = $actionIps->map(function (string $item) {
-                $range = \IPLib\Factory::parseRangeString($item);
+                $range = Factory::parseRangeString($item);
 
                 return new IpRange([
                     'adresseType' => $range->getAddressType(),

@@ -13,7 +13,7 @@ class GithubValidator implements SignatureValidator
     {
         $signature = $request->header('X-Hub-Signature-256');
 
-        if (!$signature) {
+        if (! $signature) {
             return false;
         }
 
@@ -29,6 +29,7 @@ class GithubValidator implements SignatureValidator
     public function checkValid($signature, $content, $signingSecret): bool
     {
         $computedSignature = hash_hmac('sha256', $content, $signingSecret);
-        return hash_equals('sha256=' . $computedSignature, $signature);
+
+        return hash_equals('sha256='.$computedSignature, $signature);
     }
 }
