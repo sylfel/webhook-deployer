@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\WhiteIpList;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -11,7 +12,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // TODO : add IP whitelist (github action)
+        $middleware->prepend(WhiteIpList::class);
         $middleware->validateCsrfTokens(except: [
             '/deployer',
         ]);
