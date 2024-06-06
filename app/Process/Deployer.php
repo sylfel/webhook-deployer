@@ -35,6 +35,6 @@ class Deployer extends SpatieProcessWebhookJob
         }
         Log::notice('Deployer (id : {id}) - Run {path}', ['id' => $this->webhookCall->id, 'path' => $scriptPath]);
         $result = Process::path($homePath)->run('bash .script/deploy.sh');
-        Log::notice('-- (id : {id}) - Result {result}', ['result' => $result]);
+        Log::notice('-- (id : {id}) - Result {result}', ['result' => $result->output()]);
     }
 }
