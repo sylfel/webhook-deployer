@@ -82,31 +82,6 @@ class Deployer extends SpatieProcessWebhookJob
         }
 
         $this->executeConfig($config);
-
-        // $pathSites = config('app.home');
-        // $homePath = $pathSites . $repository;
-        // if (!file_exists($homePath)) {
-        //     Log::notice('Deployer (id : {id}) - Path not exists {path}', ['id' => $id, 'path' => $homePath]);
-
-        //     return;
-        // }
-
-        // $scriptPath = $homePath . '/.script/deploy.sh';
-        // if (!file_exists($scriptPath)) {
-        //     Log::notice('Deployer (id : {id}) - Script not exists {path}', ['id' => $id, 'path' => $scriptPath]);
-
-        //     return;
-        // }
-        // Log::notice('Deployer (id : {id}) - Run {path}', ['id' => $id, 'path' => $scriptPath]);
-        // $result = Process::path($homePath)->run(['/bin/sh', $scriptPath]);
-
-        // $result = Process::path($homePath)->run('bash -lc ' . $scriptPath);
-        // if ($result->failed()) {
-        //     Log::error('Deployer failed ' . $result->errorOutput());
-        //     $this->fail('Deployer ' . $id . ' Failed whith message ' . $result->errorOutput());
-
-        //     return;
-        // }
-        // Log::notice("Deployer ({$id}) success");
+        Log::notice('Deployer (id : {id}) - Process finish', ['id' => $id]);
     }
 }
