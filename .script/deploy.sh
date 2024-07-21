@@ -1,5 +1,6 @@
 #!/bin/bash
-set -ex
+set -e
+set -x
 
 echo "Deployment started ..."
 
