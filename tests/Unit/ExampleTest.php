@@ -2,15 +2,21 @@
 
 namespace Tests\Unit;
 
-use PHPUnit\Framework\TestCase;
+use App\Process\Deployer;
+use Spatie\WebhookClient\Models\WebhookCall;
+use Tests\TestCase;
 
 class ExampleTest extends TestCase
 {
     /**
      * A basic test example.
      */
-    public function test_that_true_is_true(): void
+    public function test_deployer_read_json(): void
     {
-        $this->assertTrue(true);
+        $hook = new WebhookCall();
+        $deployer = new Deployer($hook);
+        $config = $deployer->getDeployConfig('test1');
+
+        $this->assertEquals('~/', $config['path']);
     }
 }

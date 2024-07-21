@@ -5,47 +5,108 @@ namespace App\Process;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Process;
+use Illuminate\Support\Facades\Storage;
 use Spatie\WebhookClient\Jobs\ProcessWebhookJob as SpatieProcessWebhookJob;
 
 class Deployer extends SpatieProcessWebhookJob
 {
     public $tries = 1;
 
-    public function handle()
+    public function getRepositoryName(array $payload): string|bool
     {
-        $payload = $this->webhookCall->payload;
-        $id = $this->webhookCall->id;
         $repository = Arr::get($payload, 'repository.name');
         if (! $repository) {
-            Log::notice('Deployer (id : {id}) - no repository ', ['id' => $id]);
+            Log::notice('- No repository ');
+            $this->fail('No repository');
 
-            return;
+            return false;
         }
 
-        $pathSites = config('app.home');
-        $homePath = $pathSites.$repository;
-        if (! file_exists($homePath)) {
-            Log::notice('Deployer (id : {id}) - Path not exists {path}', ['id' => $id, 'path' => $homePath]);
+        return $repository;
+    }
 
-            return;
+    public function getDeployConfig(string $repository): array|bool
+    {
+        $configs = Storage::json('deploy.json');
+        if (is_null($configs)) {
+            Log::notice('- No deploy.json');
+            $this->fail('No deploy.json');
+
+            return false;
+        }
+        $config = Arr::first($configs, function (array $value) use ($repository) {
+            return Arr::get($value, 'repository') == $repository;
+        });
+        if (is_null($config)) {
+            Log::notice('- No config found');
+            $this->fail('No config found');
+
+            return false;
         }
 
-        $scriptPath = $homePath.'/.script/deploy.sh';
-        if (! file_exists($scriptPath)) {
-            Log::notice('Deployer (id : {id}) - Script not exists {path}', ['id' => $id, 'path' => $scriptPath]);
+        return $config;
+    }
 
-            return;
+    public function executeConfig(array $config)
+    {
+        $path = Arr::get($config, 'path');
+        if (is_null($path)) {
+            Log::notice('- No "path" in config');
+            $this->fail('No "path" in config');
+
+            return false;
         }
-        Log::notice('Deployer (id : {id}) - Run {path}', ['id' => $id, 'path' => $scriptPath]);
-        $result = Process::path($homePath)->run(['/bin/sh', $scriptPath]);
+        $command = Arr::get($config, 'command');
 
-        $result = Process::path($homePath)->run('bash -lc '.$scriptPath);
+        $result = Process::path($path)->run($command);
         if ($result->failed()) {
-            Log::error('Deployer failed '.$result->errorOutput());
-            $this->fail('Deployer '.$id.' Failed whith message '.$result->errorOutput());
+            Log::error('- Failed '.$result->errorOutput());
+            $this->fail('Failed whith message '.$result->errorOutput());
+        }
+    }
 
+    public function handle()
+    {
+        $id = $this->webhookCall->id;
+        Log::notice('Deployer (id : {id}) - Start Process ', ['id' => $id]);
+
+        $payload = $this->webhookCall->payload;
+        $repository = $this->getRepositoryName($payload);
+        if ($repository === false) {
             return;
         }
-        Log::notice("Deployer ({$id}) success");
+
+        $config = $this->getDeployConfig($repository);
+        if ($config === false) {
+            return;
+        }
+
+        $this->executeConfig($config);
+
+        // $pathSites = config('app.home');
+        // $homePath = $pathSites . $repository;
+        // if (!file_exists($homePath)) {
+        //     Log::notice('Deployer (id : {id}) - Path not exists {path}', ['id' => $id, 'path' => $homePath]);
+
+        //     return;
+        // }
+
+        // $scriptPath = $homePath . '/.script/deploy.sh';
+        // if (!file_exists($scriptPath)) {
+        //     Log::notice('Deployer (id : {id}) - Script not exists {path}', ['id' => $id, 'path' => $scriptPath]);
+
+        //     return;
+        // }
+        // Log::notice('Deployer (id : {id}) - Run {path}', ['id' => $id, 'path' => $scriptPath]);
+        // $result = Process::path($homePath)->run(['/bin/sh', $scriptPath]);
+
+        // $result = Process::path($homePath)->run('bash -lc ' . $scriptPath);
+        // if ($result->failed()) {
+        //     Log::error('Deployer failed ' . $result->errorOutput());
+        //     $this->fail('Deployer ' . $id . ' Failed whith message ' . $result->errorOutput());
+
+        //     return;
+        // }
+        // Log::notice("Deployer ({$id}) success");
     }
 }
