@@ -6,45 +6,44 @@ A simple deployer from github webhook to a unique server.
 
 It's a [Laravel](https://laravel.com/) application using [Spatie webhook client](https://github.com/spatie/laravel-webhook-client) and [IPLib](https://github.com/mlocati/ip-lib)
 
-## Principe
+## How does it work ?
 
-* Github webhook send a *POST request* to your `Webhook Deployer` project
-* `Webhook Deployer` check and validate the request
-* Then it run a *command* on the server *(ex : a bash script to update a website)*
+* Github webhook sends a *POST request* to your `Webhook Deployer` project
+* `Webhook Deployer` checks and validates the request
+* Then it runs a *command* on the server *(ex : a bash script to update a website)*
 ```mermaid
 flowchart LR
     id1{{Github}} -.->id2[POST Request\nWebhook]-.->id3{{Server\nCheck & Validate}}-.->id4[RUN\nCommand]
 ```
-There is 3 validation :
+There are 3 validations :
 * IP White list (from [Meta Github API](https://api.github.com/meta))
-* Key validation *(A key must be defined in your webhook call, and it's check by app)*
-* Find project in a config file *(if not find, it will fail)*
+* Key validation *(A key must be defined in your webhook call, and it's checked by app)*
+* Find project in a config file *(if not found, it will fail)*
 
-## Install
+## Installation
 
 Clone the project on your server
-```bash
+```shell
 git clone https://github.com/sylfel/webhook-deployer.git
 ```
 Run composer
-```bash
+```shell
 composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
 ```
-Init `.env` & `deploy.json` config file
+Initialize `.env` & `deploy.json` config file
 ```bash
 cp .env.example .env
 touch storage/app/deploy.json
 ```
 
 Run database migration
-```bash
+```shell
 php artisan migrate --force
 ```
 
 Define laravel app key & run optimisation
-```sh
+```shell
 php artisan key:generate --force
-php artisan clear-compiled
 php artisan optimize
 ```
 
@@ -55,10 +54,10 @@ Define a cron to run laravel Scheduler every minute
 Where `PHP_PATH` is absolute path to php *( ex : `/usr/local/bin/php`)*
 and `APP_PATH` is path to installed application
 
-Define an public url to the `/public` directory
+Define a public url to the `/public` directory
 
 
-## Config
+## Configuration
 * Change `APP_URL` in `.env` file
 * Define a `WEBHOOK_CLIENT_SECRET` signing_secret in `.env` file
 
@@ -75,4 +74,4 @@ Define an public url to the `/public` directory
     }
 ]
 ```
-* Define a webhook in github with same key as `WEBHOOK_CLIENT_SECRET`
+* Define a webhook in github with the same key as `WEBHOOK_CLIENT_SECRET`

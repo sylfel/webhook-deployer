@@ -17,7 +17,6 @@ class Deployer extends SpatieProcessWebhookJob
         $repository = Arr::get($payload, 'repository.name');
         if (! $repository) {
             Log::notice('- No repository ');
-            $this->fail('No repository');
 
             return false;
         }
@@ -57,6 +56,12 @@ class Deployer extends SpatieProcessWebhookJob
             return false;
         }
         $command = Arr::get($config, 'command');
+        if (is_null($command)) {
+            Log::notice('- No "command" in config');
+            $this->fail('No "command" in config');
+
+            return false;
+        }
 
         $result = Process::path($path)->run($command);
         if ($result->failed()) {
