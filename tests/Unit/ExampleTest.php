@@ -8,15 +8,55 @@ use Tests\TestCase;
 
 class ExampleTest extends TestCase
 {
-    /**
-     * A basic test example.
-     */
-    public function test_deployer_read_json(): void
+    public function test_find_config(): void
     {
-        $hook = new WebhookCall();
+        $hook = new WebhookCall;
         $deployer = new Deployer($hook);
-        $config = $deployer->getDeployConfig('test1');
+        $configs = [[
+            'conditions' => [
+                'headers.X-GitHub-Event' => 'push',
+                'payload.ref' => 'refs/heads/main',
+                'payload.repository.full_name' => 'sylfel/webhook-deployer',
+            ],
+        ]];
+        $data = [
+            'headers' => [
+                'X-GitHub-Event' => 'push',
+            ],
+            'payload' => [
+                'ref' => 'refs/heads/main',
+                'repository' => [
+                    'full_name' => 'sylfel/webhook-deployer',
+                ],
+            ],
+        ];
+        $config = $deployer->findConfig($configs, $data);
+        $this->assertNotEmpty($config);
+    }
 
-        $this->assertEquals('~/', $config['path']);
+    public function test_not_find_config(): void
+    {
+        $hook = new WebhookCall;
+        $deployer = new Deployer($hook);
+        $configs = [[
+            'conditions' => [
+                'headers.X-GitHub-Event' => 'push',
+                'payload.ref' => 'refs/heads/main',
+                'payload.repository.full_name' => 'nothing',
+            ],
+        ]];
+        $data = [
+            'headers' => [
+                'X-GitHub-Event' => 'push',
+            ],
+            'payload' => [
+                'ref' => 'refs/heads/main',
+                'repository' => [
+                    'full_name' => 'sylfel/webhook-deployer',
+                ],
+            ],
+        ];
+        $config = $deployer->findConfig($configs, $data);
+        $this->assertNull($config);
     }
 }
