@@ -12,40 +12,6 @@ class Deployer extends SpatieProcessWebhookJob
 {
     public $tries = 1;
 
-    public function getRepositoryName(array $payload): string|bool
-    {
-        $repository = Arr::get($payload, 'repository.name');
-        if (! $repository) {
-            Log::notice('- No repository ');
-
-            return false;
-        }
-
-        return $repository;
-    }
-
-    public function getDeployConfig(string $repository): array|bool
-    {
-        $configs = Storage::json('deploy.json');
-        if (is_null($configs)) {
-            Log::notice('- No deploy.json');
-            $this->fail('No deploy.json');
-
-            return false;
-        }
-        $config = Arr::first($configs, function (array $value) use ($repository) {
-            return Arr::get($value, 'repository') == $repository;
-        });
-        if (is_null($config)) {
-            Log::notice('- No config found');
-            $this->fail('No config found');
-
-            return false;
-        }
-
-        return $config;
-    }
-
     public function executeConfig(array $config)
     {
         $path = Arr::get($config, 'path');
@@ -70,23 +36,51 @@ class Deployer extends SpatieProcessWebhookJob
         }
     }
 
-    public function handle()
+    public function loadConfigs(): bool|array
+    {
+        $configs = Storage::json('deploy.json');
+        if (is_null($configs)) {
+            Log::notice('- No deploy.json');
+            $this->fail('No deploy.json');
+
+            return false;
+        }
+
+        return $configs;
+    }
+
+    public function findConfig(array $configs, array $data): ?array
+    {
+        return Arr::first($configs, function (array $config) use ($data) {
+            $conditions = Arr::get($config, 'conditions');
+            if (! $conditions) {
+                return false;
+            }
+
+            return collect($conditions)->every(function ($value, $key) use ($data) {
+                return Arr::get($data, $key) == $value;
+            });
+        });
+    }
+
+    public function handle(): void
     {
         $id = $this->webhookCall->id;
         Log::notice('Deployer (id : {id}) - Start Process ', ['id' => $id]);
 
+        $configs = $this->loadConfigs();
+        if ($configs === false) {
+            return;
+        }
         $payload = $this->webhookCall->payload;
-        $repository = $this->getRepositoryName($payload);
-        if ($repository === false) {
-            return;
-        }
+        $headers = $this->webhookCall->headers;
 
-        $config = $this->getDeployConfig($repository);
-        if ($config === false) {
-            return;
+        $config = $this->findConfig($configs, ['payload' => $payload, 'headers' => $headers]);
+        if (is_null($config)) {
+            Log::notice('- No config found');
+        } else {
+            $this->executeConfig($config);
         }
-
-        $this->executeConfig($config);
         Log::notice('Deployer (id : {id}) - Process finish', ['id' => $id]);
     }
 }

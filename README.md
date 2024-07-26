@@ -65,7 +65,11 @@ Define a public url to the `/public` directory
 ```json
 [
     {
-        "repository": "webhook-deployer", // repository name
+        "conditions": { // all conditions
+            "headers.X-GitHub-Event":"push", // from headers
+            "payload.ref":"refs/heads/main", // from payload 
+            "payload.repository.full_name":"sylfel/webhook-deployer"
+        },
         "path":"/path/to/project/webhook-deployer", // path from where to run command
         "command":"bash -lc .script/deploy.sh" // command to run
     },
