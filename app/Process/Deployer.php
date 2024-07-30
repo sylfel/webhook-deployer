@@ -57,8 +57,10 @@ class Deployer extends SpatieProcessWebhookJob
                 return false;
             }
 
-            return collect($conditions)->every(function ($value, $key) use ($data) {
-                return Arr::get($data, $key) == $value;
+            return collect($conditions)->every(function ($condition, $key) use ($data) {
+                $value = Arr::get($data, $key) ?? Arr::get($data, strtolower($key));
+
+                return Arr::accessible($value) ? in_array($condition, $value) : $condition == $value;
             });
         });
     }
