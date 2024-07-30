@@ -21,7 +21,33 @@ class ExampleTest extends TestCase
         ]];
         $data = [
             'headers' => [
-                'X-GitHub-Event' => 'push',
+                'X-GitHub-Event' => ['push'],
+            ],
+            'payload' => [
+                'ref' => 'refs/heads/main',
+                'repository' => [
+                    'full_name' => 'sylfel/webhook-deployer',
+                ],
+            ],
+        ];
+        $config = $deployer->findConfig($configs, $data);
+        $this->assertNotEmpty($config);
+    }
+
+    public function test_find_config_data_lowercase(): void
+    {
+        $hook = new WebhookCall;
+        $deployer = new Deployer($hook);
+        $configs = [[
+            'conditions' => [
+                'headers.X-GitHub-Event' => 'push',
+                'payload.ref' => 'refs/heads/main',
+                'payload.repository.full_name' => 'sylfel/webhook-deployer',
+            ],
+        ]];
+        $data = [
+            'headers' => [
+                'x-github-event' => ['push'],
             ],
             'payload' => [
                 'ref' => 'refs/heads/main',
@@ -40,7 +66,7 @@ class ExampleTest extends TestCase
         $deployer = new Deployer($hook);
         $configs = [[
             'conditions' => [
-                'headers.X-GitHub-Event' => 'push',
+                'headers.X-GitHub-Event' => ['push'],
                 'payload.ref' => 'refs/heads/main',
                 'payload.repository.full_name' => 'nothing',
             ],
