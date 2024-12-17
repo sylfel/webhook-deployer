@@ -17,6 +17,8 @@ return [
 
     'home' => env('APP_HOME', null),
 
+    'mail_to' => env('MAIL_TO', null),
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment

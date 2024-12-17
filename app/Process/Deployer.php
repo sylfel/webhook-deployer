@@ -2,8 +2,10 @@
 
 namespace App\Process;
 
+use App\Mail\DeployInformation;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Storage;
 use Spatie\WebhookClient\Jobs\ProcessWebhookJob as SpatieProcessWebhookJob;
@@ -30,9 +32,13 @@ class Deployer extends SpatieProcessWebhookJob
         }
 
         $result = Process::path($path)->run($command);
+        $user = config('app.mail_to');
+        if ($user) {
+            Mail::to($user)->send(new DeployInformation($this->webhookCall, $result->failed()));
+        }
         if ($result->failed()) {
-            Log::error('- Failed '.$result->errorOutput());
-            $this->fail('Failed whith message '.$result->errorOutput());
+            Log::error('- Failed ' . $result->errorOutput());
+            $this->fail('Failed whith message ' . $result->errorOutput());
         }
     }
 
