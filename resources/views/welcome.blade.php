@@ -9,7 +9,12 @@
 </head>
 
 <body>
-    <h1>Ok</h1>
+    <h1>Webhook Deployer</h1>
+    @use('\Spatie\WebhookClient\Models\WebhookCall')
+
+    @foreach (WebhookCall::all() as $webhook)
+        <div>#{{ $webhook->id }} : {{ $webhook->name }}</div>
+    @endforeach
 </body>
 
 </html>
