@@ -12,8 +12,8 @@
     <h1>Webhook Deployer</h1>
     @use('\Spatie\WebhookClient\Models\WebhookCall')
 
-    @foreach (WebhookCall::all() as $webhook)
-        <div>#{{ $webhook->id }} : {{ $webhook->name }}</div>
+    @foreach (WebhookCall::query()->latest()->take(10)->all() as $webhook)
+        <div>#{{ $webhook->id }} : {{ $webhook->url }}</div>
     @endforeach
 </body>
 
